@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../providers/trip_provider.dart';
 import '../utils/ui_constants.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -138,7 +137,9 @@ class _HomeTab extends StatelessWidget {
                               // Navigate to create trip
                             },
                             style: AppDecorations.primaryButtonStyle.copyWith(
-                              minimumSize: const Size(200, AppDimensions.buttonHeightM),
+                              minimumSize: MaterialStateProperty.all(
+                                const Size(200, AppDimensions.buttonHeightM),
+                              ),
                             ),
                             child: const Text('Plan a Trip'),
                           ),
@@ -315,7 +316,9 @@ class _TripsTab extends StatelessWidget {
                               // Navigate to create trip
                             },
                             style: AppDecorations.primaryButtonStyle.copyWith(
-                              minimumSize: const Size(200, AppDimensions.buttonHeightM),
+                              minimumSize: MaterialStateProperty.all(
+                                const Size(200, AppDimensions.buttonHeightM),
+                              ),
                             ),
                             child: const Text('Create Trip'),
                           ),
