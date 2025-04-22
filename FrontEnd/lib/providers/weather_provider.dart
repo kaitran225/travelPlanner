@@ -5,8 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/weather.dart';
 
 class WeatherProvider extends ChangeNotifier {
-  Map<String, Weather> _weather = {}; // locationId -> Weather
-  Map<String, DateTime> _lastFetched = {}; // locationId -> DateTime
+  final Map<String, Weather> _weather = {}; // locationId -> Weather
+  final Map<String, DateTime> _lastFetched = {}; // locationId -> DateTime
   bool _isLoading = false;
   String? _error;
   

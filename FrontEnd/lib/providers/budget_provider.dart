@@ -6,8 +6,8 @@ import '../models/expense.dart';
 import '../models/budget.dart';
 
 class BudgetProvider extends ChangeNotifier {
-  Map<String, Budget> _budgets = {}; // tripId -> Budget
-  Map<String, List<Expense>> _expenses = {}; // tripId -> List<Expense>
+  final Map<String, Budget> _budgets = {}; // tripId -> Budget
+  final Map<String, List<Expense>> _expenses = {}; // tripId -> List<Expense>
   bool _isLoading = false;
   String? _error;
   
