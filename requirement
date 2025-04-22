@@ -1,0 +1,131 @@
+# Travel Planner App – Requirements
+
+## 1. Purpose
+The Travel Planner App enables users to plan, organize, and manage travel itineraries efficiently. It integrates booking, budgeting, and location-based recommendation features with a focus on mobile web experience.
+
+## 2. Tech Stack
+
+- **Frontend**: React.js/Vue.js (Mobile web PWA focus)
+- **Backend**: Spring Boot (RESTful API)
+- **Database**: MySQL (Aiven / Railway-compatible)
+- **Infrastructure**: Docker (containerized backend)
+- **Deployment**: Railway (Docker service for backend), Vercel (for frontend web)
+- **Authentication**: JWT (stateless sessions)
+- **PWA**: Service Workers for offline functionality
+
+## 3. Features
+
+### 3.1 Authentication
+- User registration/login via email/password
+- OAuth 2.0 (Google)
+- JWT-based auth with role-based access control
+- Token refresh endpoint
+
+### 3.2 Trip Management
+- Create/edit/delete trips
+- Associate multiple destinations with a single trip
+- Each destination has start/end dates and travel notes
+- Drag-and-drop reordering
+- Collaborative trip planning with travel companions
+
+### 3.3 Itinerary Planner
+- Day-by-day schedule with precise time blocks (30-minute increments)
+- Add/edit custom activities with duration estimates
+- Conflict detection for overlapping activities
+- Travel time calculations between locations
+- Travel checklist per trip
+- Export itinerary as PDF or sync with Google Calendar
+- Offline access to saved itineraries
+
+### 3.4 Booking Integration (Phase 2+)
+- Integration with flight/hotel APIs (Skyscanner, Booking.com)
+- Store booking metadata (confirmation codes, links)
+- View bookings in itinerary timeline
+
+### 3.5 Budgeting and Prediction
+- Set total budget per trip
+- Categorized expenses: travel, lodging, food, attractions, misc.
+- Realtime budget tracking and visual reports (charts/graphs)
+- Budget prediction based on:
+  - Historical spending data from previous trips
+  - Location-based cost of living adjustments
+  - Machine learning model for expense forecasting
+- Real-time currency conversion for international trips
+- Receipt scanning and expense tracking
+- Store expense data in MySQL (linked to trip ID)
+
+### 3.6 Geolocation & Weather
+- Google Maps integration
+- Offline route saving and maps for navigation without internet
+- Nearby POIs using Maps API
+- Location-aware suggestions for food, attractions
+- 7-day weather forecasts for all destinations
+- Weather-based activity recommendations
+- Severe weather alerts with notifications
+- Historical weather patterns for future trip planning
+
+### 3.7 Notifications
+- Trip reminders via email (Spring Mail)
+- Push notifications (Service Worker API)
+- Weather and travel alerts
+
+### 3.8 User Profile
+- Edit personal info and preferences
+- Save favorite destinations
+- View travel history (paginated backend endpoint)
+- Travel preferences for personalized recommendations
+
+## 4. API Structure
+
+- RESTful endpoints following `/api/v1`
+- JSON-based request/response bodies
+- Swagger/OpenAPI documentation via Springdoc
+- Sample endpoint: `GET /api/v1/trips/{userId}`
+
+## 5. Non-Functional Requirements
+
+### 5.1 Performance
+- API average latency <300ms
+- Service Workers and IndexedDB for offline capabilities
+- Optimized assets for mobile data usage
+
+### 5.2 Scalability
+- Backend Dockerized and deployed on Railway
+- Stateless services with Docker scaling
+- Horizontal scale via Railway autoscale
+
+### 5.3 Security
+- TLS 1.3 for all traffic
+- Encrypted JWTs
+- Input validation and SQL injection protection via JPA and DTOs
+
+### 5.4 Usability
+- Mobile-first responsive web design
+- Light/dark theme toggle
+- Touch-optimized UI elements
+- Offline-first user experience
+
+### 5.5 Localization
+- i18n support
+- Default language: English
+- Configurable locale on user profile
+
+## 6. External APIs
+
+- Google Maps SDK + Directions API
+- Skyscanner/Booking.com (mock until phase 2)
+- OpenWeatherMap for forecasts and historical data
+- Google Calendar API (OAuth integration via Spring Security)
+- Currency conversion API for budget calculations
+
+## 7. Constraints
+
+- PWA must support offline mode with IndexedDB for storing:
+  - Complete itineraries with time blocks
+  - Saved routes and maps for offline navigation
+  - Budget information and expenses
+- Background sync to update server when connection is restored
+- Booking APIs can be mocked for MVP
+- All backend services must run inside a Docker container
+- Only Railway is used for backend deployment; use GitHub Actions for CI
+
