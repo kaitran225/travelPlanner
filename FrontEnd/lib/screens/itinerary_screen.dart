@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../utils/ui_constants.dart';
 
 class ItineraryScreen extends StatelessWidget {
   const ItineraryScreen({super.key});

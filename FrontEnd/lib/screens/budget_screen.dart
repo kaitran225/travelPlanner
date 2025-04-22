@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../utils/ui_constants.dart';
 
 class BudgetScreen extends StatelessWidget {
   const BudgetScreen({super.key});
