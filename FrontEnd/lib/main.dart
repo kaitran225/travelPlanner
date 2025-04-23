@@ -103,8 +103,7 @@ class MyApp extends StatelessWidget {
               onSecondaryContainer: AppColors.accentDark,
               error: AppColors.error,
               surface: AppColors.white,
-              background: AppColors.offWhite,
-              onBackground: AppColors.black,
+              onSurface: AppColors.black,
             )
           : ColorScheme.dark(
               primary: AppColors.primaryLight,
@@ -117,8 +116,7 @@ class MyApp extends StatelessWidget {
               onSecondaryContainer: AppColors.accentLight,
               error: AppColors.error,
               surface: AppColors.darkGrey,
-              background: AppColors.black,
-              onBackground: AppColors.white,
+              onSurface: AppColors.white,
             ),
       textTheme: GoogleFonts.poppinsTextTheme(
         brightness == Brightness.light

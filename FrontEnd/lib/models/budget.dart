@@ -1,37 +1,31 @@
 class Budget {
-  String id;
-  String tripId;
-  double total;
+  final String id;
+  final double total;
   double spent;
-  Map<String, double> categoryLimits;
-  String currency;
-  
+  final List<BudgetCategory> categories;
+
   Budget({
     required this.id,
-    required this.tripId,
     required this.total,
     this.spent = 0.0,
-    required this.categoryLimits,
-    required this.currency,
+    required this.categories,
   });
   
   // Factory constructor to create Budget from JSON
   factory Budget.fromJson(Map<String, dynamic> json) {
-    Map<String, double> categoryLimits = {};
+    List<BudgetCategory> categoryList = [];
     
-    if (json['categoryLimits'] != null) {
-      json['categoryLimits'].forEach((key, value) {
-        categoryLimits[key] = value.toDouble();
-      });
+    if (json['categories'] != null) {
+      categoryList = (json['categories'] as List)
+          .map((category) => BudgetCategory.fromJson(category))
+          .toList();
     }
     
     return Budget(
       id: json['id'],
-      tripId: json['tripId'],
-      total: json['total'],
-      spent: json['spent'] ?? 0.0,
-      categoryLimits: categoryLimits,
-      currency: json['currency'],
+      total: json['total'].toDouble(),
+      spent: json['spent']?.toDouble() ?? 0.0,
+      categories: categoryList,
     );
   }
   
@@ -39,11 +33,9 @@ class Budget {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'tripId': tripId,
       'total': total,
       'spent': spent,
-      'categoryLimits': categoryLimits,
-      'currency': currency,
+      'categories': categories.map((category) => category.toJson()).toList(),
     };
   }
   
@@ -66,19 +58,64 @@ class Budget {
   // Create a copy of the budget with given fields replaced with new values
   Budget copyWith({
     String? id,
-    String? tripId,
     double? total,
     double? spent,
-    Map<String, double>? categoryLimits,
-    String? currency,
+    List<BudgetCategory>? categories,
   }) {
     return Budget(
       id: id ?? this.id,
-      tripId: tripId ?? this.tripId,
       total: total ?? this.total,
       spent: spent ?? this.spent,
-      categoryLimits: categoryLimits ?? Map.from(this.categoryLimits),
-      currency: currency ?? this.currency,
+      categories: categories ?? List.from(this.categories),
+    );
+  }
+}
+
+class BudgetCategory {
+  final String id;
+  final String name;
+  final double budgeted;
+  double spent;
+
+  BudgetCategory({
+    required this.id,
+    required this.name,
+    required this.budgeted,
+    this.spent = 0.0,
+  });
+  
+  // Factory constructor to create BudgetCategory from JSON
+  factory BudgetCategory.fromJson(Map<String, dynamic> json) {
+    return BudgetCategory(
+      id: json['id'],
+      name: json['name'],
+      budgeted: json['budgeted'].toDouble(),
+      spent: json['spent']?.toDouble() ?? 0.0,
+    );
+  }
+  
+  // Convert BudgetCategory to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'budgeted': budgeted,
+      'spent': spent,
+    };
+  }
+  
+  // Create a copy of the budget category with given fields replaced with new values
+  BudgetCategory copyWith({
+    String? id,
+    String? name,
+    double? budgeted,
+    double? spent,
+  }) {
+    return BudgetCategory(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      budgeted: budgeted ?? this.budgeted,
+      spent: spent ?? this.spent,
     );
   }
 } 

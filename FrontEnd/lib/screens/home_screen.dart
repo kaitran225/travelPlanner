@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/ui_constants.dart';
+import '../data/fake_data.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
             _currentIndex = index;
           });
         },
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: AppColors.mediumGrey,
+        selectedLabelStyle: AppTextStyles.bodyS.copyWith(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: AppTextStyles.bodyS,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
@@ -66,6 +72,11 @@ class _HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FakeData.currentUser;
+    final upcomingTrips = FakeData.trips.where((trip) => 
+      trip.startDate.isAfter(DateTime.now())
+    ).toList();
+    
     return SafeArea(
       child: CustomScrollView(
         slivers: [
@@ -89,7 +100,7 @@ class _HomeTab extends StatelessWidget {
                 children: [
                   // Welcome section
                   Text(
-                    'Welcome back!',
+                    'Welcome back, ${user.name.split(' ')[0]}!',
                     style: AppTextStyles.headingL,
                   ),
                   const SizedBox(height: AppDimensions.paddingS),
@@ -108,45 +119,58 @@ class _HomeTab extends StatelessWidget {
                   ),
                   const SizedBox(height: AppDimensions.paddingM),
                   
-                  // Placeholder for upcoming trips
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: AppColors.offWhite,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.flight_takeoff,
-                            size: AppDimensions.iconXL,
-                            color: AppColors.mediumGrey,
-                          ),
-                          const SizedBox(height: AppDimensions.paddingM),
-                          Text(
-                            'No upcoming trips',
-                            style: AppTextStyles.bodyL.copyWith(
+                  // Upcoming trips list or placeholder
+                  if (upcomingTrips.isEmpty)
+                    Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: AppColors.offWhite,
+                        borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.flight_takeoff,
+                              size: AppDimensions.iconXL,
                               color: AppColors.mediumGrey,
                             ),
-                          ),
-                          const SizedBox(height: AppDimensions.paddingS),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Navigate to create trip
-                            },
-                            style: AppDecorations.primaryButtonStyle.copyWith(
-                              minimumSize: MaterialStateProperty.all(
-                                const Size(200, AppDimensions.buttonHeightM),
+                            const SizedBox(height: AppDimensions.paddingM),
+                            Text(
+                              'No upcoming trips',
+                              style: AppTextStyles.bodyL.copyWith(
+                                color: AppColors.mediumGrey,
                               ),
                             ),
-                            child: const Text('Plan a Trip'),
-                          ),
-                        ],
+                            const SizedBox(height: AppDimensions.paddingS),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Navigate to create trip
+                              },
+                              style: AppDecorations.primaryButtonStyle.copyWith(
+                                minimumSize: MaterialStateProperty.all(
+                                  const Size(200, AppDimensions.buttonHeightM),
+                                ),
+                              ),
+                              child: const Text('Plan a Trip'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: upcomingTrips.length,
+                        itemBuilder: (context, index) {
+                          final trip = upcomingTrips[index];
+                          return _TripCard(trip: trip);
+                        },
                       ),
                     ),
-                  ),
                   const SizedBox(height: AppDimensions.paddingXL),
                   
                   // Quick actions section
@@ -192,6 +216,88 @@ class _HomeTab extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TripCard extends StatelessWidget {
+  final dynamic trip;
+
+  const _TripCard({required this.trip});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('MMM d');
+    final startDate = dateFormat.format(trip.startDate);
+    final endDate = dateFormat.format(trip.endDate);
+    
+    return Container(
+      width: 280,
+      margin: const EdgeInsets.only(right: AppDimensions.paddingM),
+      decoration: AppDecorations.cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Trip image
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(AppDimensions.radiusL),
+              topRight: Radius.circular(AppDimensions.radiusL),
+            ),
+            child: Image.network(
+              trip.coverImage,
+              height: 120,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          
+          // Trip details
+          Padding(
+            padding: const EdgeInsets.all(AppDimensions.paddingM),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  trip.title,
+                  style: AppTextStyles.headingS,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppDimensions.paddingXS),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today,
+                      size: AppDimensions.iconS,
+                      color: AppColors.mediumGrey,
+                    ),
+                    const SizedBox(width: AppDimensions.paddingXS),
+                    Text(
+                      '$startDate - $endDate',
+                      style: AppTextStyles.bodyS.copyWith(
+                        color: AppColors.mediumGrey,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.paddingM),
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigate to trip details
+                  },
+                  style: AppDecorations.secondaryButtonStyle.copyWith(
+                    minimumSize: MaterialStateProperty.all(
+                      const Size(double.infinity, AppDimensions.buttonHeightS),
+                    ),
+                  ),
+                  child: const Text('View Details'),
+                ),
+              ],
             ),
           ),
         ],
@@ -253,6 +359,8 @@ class _TripsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final trips = FakeData.trips;
+    
     return SafeArea(
       child: CustomScrollView(
         slivers: [
@@ -280,52 +388,63 @@ class _TripsTab extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Placeholder for trips list
-                  Container(
-                    height: 400,
-                    decoration: BoxDecoration(
-                      color: AppColors.offWhite,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.map,
-                            size: AppDimensions.iconXXL,
-                            color: AppColors.mediumGrey,
-                          ),
-                          const SizedBox(height: AppDimensions.paddingM),
-                          Text(
-                            'No trips yet',
-                            style: AppTextStyles.headingM.copyWith(
+                  // Trips list or placeholder
+                  if (trips.isEmpty)
+                    Container(
+                      height: 400,
+                      decoration: BoxDecoration(
+                        color: AppColors.offWhite,
+                        borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.map,
+                              size: AppDimensions.iconXXL,
                               color: AppColors.mediumGrey,
                             ),
-                          ),
-                          const SizedBox(height: AppDimensions.paddingS),
-                          Text(
-                            'Start planning your first trip',
-                            style: AppTextStyles.bodyL.copyWith(
-                              color: AppColors.mediumGrey,
-                            ),
-                          ),
-                          const SizedBox(height: AppDimensions.paddingL),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Navigate to create trip
-                            },
-                            style: AppDecorations.primaryButtonStyle.copyWith(
-                              minimumSize: MaterialStateProperty.all(
-                                const Size(200, AppDimensions.buttonHeightM),
+                            const SizedBox(height: AppDimensions.paddingM),
+                            Text(
+                              'No trips yet',
+                              style: AppTextStyles.headingM.copyWith(
+                                color: AppColors.mediumGrey,
                               ),
                             ),
-                            child: const Text('Create Trip'),
-                          ),
-                        ],
+                            const SizedBox(height: AppDimensions.paddingS),
+                            Text(
+                              'Start planning your first trip',
+                              style: AppTextStyles.bodyL.copyWith(
+                                color: AppColors.mediumGrey,
+                              ),
+                            ),
+                            const SizedBox(height: AppDimensions.paddingL),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Navigate to create trip
+                              },
+                              style: AppDecorations.primaryButtonStyle.copyWith(
+                                minimumSize: MaterialStateProperty.all(
+                                  const Size(200, AppDimensions.buttonHeightM),
+                                ),
+                              ),
+                              child: const Text('Create Trip'),
+                            ),
+                          ],
+                        ),
                       ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: trips.length,
+                      itemBuilder: (context, index) {
+                        final trip = trips[index];
+                        return _TripListItem(trip: trip);
+                      },
                     ),
-                  ),
                 ],
               ),
             ),
@@ -336,11 +455,103 @@ class _TripsTab extends StatelessWidget {
   }
 }
 
+class _TripListItem extends StatelessWidget {
+  final dynamic trip;
+
+  const _TripListItem({required this.trip});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('MMM d, yyyy');
+    final startDate = dateFormat.format(trip.startDate);
+    final endDate = dateFormat.format(trip.endDate);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppDimensions.paddingM),
+      decoration: AppDecorations.cardDecoration,
+      child: InkWell(
+        onTap: () {
+          // Navigate to trip details
+        },
+        borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Trip image
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(AppDimensions.radiusL),
+                topRight: Radius.circular(AppDimensions.radiusL),
+              ),
+              child: Image.network(
+                trip.coverImage,
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            
+            // Trip details
+            Padding(
+              padding: const EdgeInsets.all(AppDimensions.paddingM),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    trip.title,
+                    style: AppTextStyles.headingS,
+                  ),
+                  const SizedBox(height: AppDimensions.paddingXS),
+                  Text(
+                    trip.description,
+                    style: AppTextStyles.bodyM.copyWith(
+                      color: AppColors.mediumGrey,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: AppDimensions.paddingM),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today,
+                        size: AppDimensions.iconS,
+                        color: AppColors.mediumGrey,
+                      ),
+                      const SizedBox(width: AppDimensions.paddingXS),
+                      Text(
+                        '$startDate - $endDate',
+                        style: AppTextStyles.bodyS.copyWith(
+                          color: AppColors.mediumGrey,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${trip.places.length} places',
+                        style: AppTextStyles.bodyS.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ProfileTab extends StatelessWidget {
   const _ProfileTab();
 
   @override
   Widget build(BuildContext context) {
+    final user = FakeData.currentUser;
+    
     return SafeArea(
       child: CustomScrollView(
         slivers: [
@@ -364,17 +575,7 @@ class _ProfileTab extends StatelessWidget {
                   // Profile header
                   Container(
                     padding: const EdgeInsets.all(AppDimensions.paddingL),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.black.withValues(alpha: 15),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
+                    decoration: AppDecorations.cardDecoration,
                     child: Column(
                       children: [
                         // Profile picture
@@ -390,32 +591,40 @@ class _ProfileTab extends StatelessWidget {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.black.withValues(alpha: 15),
+                                color: AppColors.black.withOpacity(0.15),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
                             ],
+                            image: user.profilePicture != null
+                                ? DecorationImage(
+                                    image: NetworkImage(user.profilePicture!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                           ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.person,
-                              size: AppDimensions.iconXXL,
-                              color: AppColors.white,
-                            ),
-                          ),
+                          child: user.profilePicture == null
+                              ? const Center(
+                                  child: Icon(
+                                    Icons.person,
+                                    size: AppDimensions.iconXXL,
+                                    color: AppColors.white,
+                                  ),
+                                )
+                              : null,
                         ),
                         const SizedBox(height: AppDimensions.paddingL),
                         
                         // User name
                         Text(
-                          'John Doe',
+                          user.name,
                           style: AppTextStyles.headingM,
                         ),
                         const SizedBox(height: AppDimensions.paddingS),
                         
                         // User email
                         Text(
-                          'john.doe@example.com',
+                          user.email,
                           style: AppTextStyles.bodyM.copyWith(
                             color: AppColors.mediumGrey,
                           ),
@@ -446,7 +655,7 @@ class _ProfileTab extends StatelessWidget {
                       Expanded(
                         child: _StatCard(
                           icon: Icons.flight_takeoff,
-                          value: '0',
+                          value: user.tripsCount.toString(),
                           label: 'Trips',
                         ),
                       ),
@@ -454,7 +663,7 @@ class _ProfileTab extends StatelessWidget {
                       Expanded(
                         child: _StatCard(
                           icon: Icons.place,
-                          value: '0',
+                          value: user.placesCount.toString(),
                           label: 'Places',
                         ),
                       ),
@@ -462,7 +671,7 @@ class _ProfileTab extends StatelessWidget {
                       Expanded(
                         child: _StatCard(
                           icon: Icons.photo,
-                          value: '0',
+                          value: user.photosCount.toString(),
                           label: 'Photos',
                         ),
                       ),
@@ -552,17 +761,7 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.paddingM),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 10),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: AppDecorations.cardDecoration,
       child: Column(
         children: [
           Icon(
